@@ -1,0 +1,60 @@
+from model import Model
+import os
+
+def get_answer(*, sys_prompt: str, request: str, context: str) -> str:
+    """
+    Получает ответ от LLM на основе системного промпта, контекста и запроса
+    
+    Args:
+        sys_prompt(str): Системный промпт, определяющий поведение модели
+        request(str): Основной запрос пользователя
+        context(str): Дополнительный контекст для запроса
+        
+    Returns:
+        Ответ языковой модели в виде строки
+    """
+    model = Model()
+    
+    messages = [
+        {"role": "system", "content": sys_prompt},    
+        {"role": "user", "content": context},           
+        {"role": "user", "content": request} 
+    ]
+    
+    response = model.get_response(messages)
+    
+    return response
+
+def add_context(request: str) -> list[str]:
+    """
+    Загружает системный промпт и контекст из файлов
+    
+    Args:
+        request(str): Исходный запрос пользователя
+        
+    Returns:
+        Список из трех строк: [системный промпт, исходный запрос, контекст]
+    """
+    with open(os.getenv("MODEL_SYS_PROMPT"), 'r') as file:  
+        prompt = file.read()
+    
+    with open(os.getenv("MODEL_CONTEXT"), 'r') as file:  
+        context = file.read()
+    
+    return [prompt, request, context]
+
+def ai_request(*, request: str = "Hi! Tell me about yourself.") -> str:
+    """
+    Точка входа для получения ответа
+    
+    Args:
+        request: Запрос пользователя. 
+            По умолчанию "Hi! Tell me about yourself."
+        
+    Returns:
+        Ответ модели на запрос
+    """
+    prompt, context_request, context = add_context(request)
+    answer = get_answer(sys_prompt=prompt, request=context_request, context=context)
+    
+    return answer
