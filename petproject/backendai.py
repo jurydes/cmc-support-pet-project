@@ -1,5 +1,6 @@
-from model import Model
-import os
+from model import model
+from config import config
+from schemas import Messages, Message
 
 def get_answer(*, sys_prompt: str, request: str, context: str) -> str:
     """
@@ -13,13 +14,10 @@ def get_answer(*, sys_prompt: str, request: str, context: str) -> str:
     Returns:
         Ответ языковой модели в виде строки
     """
-    model = Model()
-    
-    messages = [
-        {"role": "system", "content": sys_prompt},    
-        {"role": "user", "content": context},           
-        {"role": "user", "content": request} 
-    ]
+    messages = Messages(messages=[
+        Message(role="system", content=sys_prompt),
+        Message(role="user", content=f"Контекст: {context}\n\nВопрос: {request}")
+    ])
     
     response = model.get_response(messages)
     
@@ -35,10 +33,10 @@ def add_context(request: str) -> list[str]:
     Returns:
         Список из трех строк: [системный промпт, исходный запрос, контекст]
     """
-    with open(os.getenv("MODEL_SYS_PROMPT"), 'r') as file:  
+    with open(config.sys_prompt, 'r') as file:  
         prompt = file.read()
     
-    with open(os.getenv("MODEL_CONTEXT"), 'r') as file:  
+    with open(config.context, 'r') as file:  
         context = file.read()
     
     return [prompt, request, context]

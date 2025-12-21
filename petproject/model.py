@@ -1,5 +1,6 @@
 from openai import OpenAI
-import os
+from schemas import Messages
+from config import config
 
 
 class Model:
@@ -14,17 +15,17 @@ class Model:
 
     def __init__(self):
         """Инициализирует модель"""
-        self.base_url = os.getenv("BASE_URL") 
-        self.api_key = os.getenv("OPENROUTER_API_KEY")
+        self.base_url = config.url
+        self.api_key = config.api_key.get_secret_value()
         self.client = OpenAI(base_url=self.base_url,api_key=self.api_key)
-        self.model = os.getenv("MODEL_NAME")
+        self.model = config.model_name
     
-    def get_response(self, messages: list) -> str:
+    def get_response(self, messages: Messages) -> str:
         """
         Возвращает ответ на запрос пользователя
         
         Args:
-            messages(list): Сообщения, которые будут переданы модели
+            messages(Messages): Сообщения, которые будут переданы модели
         
         Returns:
             Ответ модели
@@ -32,15 +33,15 @@ class Model:
         Raises:
             ValueError: Если messages пустой или содержит только NaN
         """
-        if (messages is None) or (not messages):
+        if not messages:
             raise ValueError("Сообщение не было передано!")
         
-        client = self.client
-        
-        response = client.chat.completions.create(
+        response = self.client.chat.completions.create(
             model=self.model,
-            messages=messages
+            messages=messages.unwrap()
         )
         
         msg = response.choices[0].message.content
         return msg
+
+model = Model()

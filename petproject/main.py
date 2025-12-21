@@ -1,9 +1,7 @@
 from backendai import ai_request
-from dotenv import load_dotenv
 
 
 def main():
-    load_dotenv()
     try:
         request = input("Вводите свои запросы. Если хотите остановить программу, введите 'end' или завершите работу с помощью ctrl+c:\n")
         while request.lower() != "end":
@@ -13,8 +11,6 @@ def main():
             request = input("\n")
     except KeyboardInterrupt:
         print("\nСпасибо что пользовались моим ботом!")
-    finally:
-        pass
 
 if __name__ == "__main__":
     main()
