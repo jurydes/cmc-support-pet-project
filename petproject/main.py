@@ -11,6 +11,9 @@ def main():
             request = input("\n")
     except KeyboardInterrupt:
         print("\nСпасибо что пользовались моим ботом!")
+    except Exception as e:
+        print(f"Ошибка: {e}")
+
 
 if __name__ == "__main__":
     main()

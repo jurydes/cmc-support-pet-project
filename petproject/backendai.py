@@ -1,29 +1,15 @@
-from model import model
-from config import config
-from schemas import Messages, Message
+from model import Model
+from config import project_config
+from prompts import Loader
 
-def get_answer(*, sys_prompt: str, request: str, context: str) -> str:
-    """
-    Получает ответ от LLM на основе системного промпта, контекста и запроса
-    
-    Args:
-        sys_prompt(str): Системный промпт, определяющий поведение модели
-        request(str): Основной запрос пользователя
-        context(str): Дополнительный контекст для запроса
-        
-    Returns:
-        Ответ языковой модели в виде строки
-    """
-    messages = Messages(messages=[
-        Message(role="system", content=sys_prompt),
-        Message(role="user", content=f"Контекст: {context}\n\nВопрос: {request}")
-    ])
-    
-    response = model.get_response(messages)
-    
-    return response
+loader = Loader(
+    sys_prompt_path=project_config.sys_prompt_path,
+    context_path=project_config.context_path,
+)
 
-def add_context(request: str) -> list[str]:
+model = Model()
+
+def get_prompt_and_context(request: str) -> list[str]:
     """
     Загружает системный промпт и контекст из файлов
     
@@ -31,17 +17,17 @@ def add_context(request: str) -> list[str]:
         request(str): Исходный запрос пользователя
         
     Returns:
-        Список из трех строк: [системный промпт, исходный запрос, контекст]
+        Список из трех строк: [системный промпт, пользовательский промпт]
     """
-    with open(config.sys_prompt, 'r') as file:  
-        prompt = file.read()
-    
-    with open(config.context, 'r') as file:  
-        context = file.read()
-    
-    return [prompt, request, context]
+    prompt = loader.load_system_prompt()
+    context = loader.load_context()
 
-def ai_request(*, request: str = "Hi! Tell me about yourself.") -> str:
+    user_prompt = f"Контекст: {context}\n\nВопрос: {request}"
+
+    return [prompt, user_prompt]
+
+
+def ai_request(*, request: str = "Привет! Расскажи о себе.") -> str:
     """
     Точка входа для получения ответа
     
@@ -52,7 +38,7 @@ def ai_request(*, request: str = "Hi! Tell me about yourself.") -> str:
     Returns:
         Ответ модели на запрос
     """
-    prompt, context_request, context = add_context(request)
-    answer = get_answer(sys_prompt=prompt, request=context_request, context=context)
+    prompt, user_prompt = get_prompt_and_context(request)
+    answer = model.get_answer(sys_prompt=prompt, request=user_prompt)
     
     return answer

@@ -1,9 +1,14 @@
 from pydantic import BaseModel
+from enum import Enum
 
+class Role(str, Enum):
+    """Роль"""
+    SYSTEM = "system"
+    USER = "user"
 
 class Message(BaseModel):
     """Сообщение"""
-    role: str
+    role: Role
     content: str
 
     def unwrap(self) -> dict:
