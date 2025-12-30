@@ -1,6 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field, SecretStr 
-from pathlib import Path
+
 
 class Config(BaseSettings):
     """Глобальные параметры конфигурации приложения"""
@@ -8,8 +8,4 @@ class Config(BaseSettings):
     
     api_key: SecretStr = Field(alias='OPENROUTER_API_KEY')
     model_name: str = Field("arcee-ai/trinity-mini:free", description="Название модели")
-    sys_prompt_path: Path = Field("data/sysprompt.txt", description="Путь к файлу с системным промптом")
-    context_path: Path = Field("data/context.txt", description="Путь к файлу с контекстом")
     url: str = Field("https://openrouter.ai/api/v1", description="Базовый URL API")
-
-project_config = Config()
